@@ -6,6 +6,8 @@ import Loader from '../Loader/Loader';
 const API_URL = process.env.REACT_APP_API_URL;
 
 export default function Login() {
+  // const navigate = useNavigate();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
