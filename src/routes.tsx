@@ -6,16 +6,31 @@ import Registration from './components/Auth/Registration';
 import Error from './components/Error/Error';
 import Chat from './components/Chat/Chat';
 import Home from './components/Home/Home';
+import Welcome from './components/Home/Welcome';
 
 const routes = (isLoggedIn: boolean) => [
-  {
-    path: '/',
-    element: !isLoggedIn ? <Home /> : <Chat />,
-  },
   // {
   //   path: '/chat',
-  //   element: <Chat />,
+  //   element: isLoggedIn ? <Chat /> : <Navigate to="/login" />,
   // },
+  //
+  // {
+  //   path: '/',
+  //   element: !isLoggedIn ? <Home /> : <Navigate to="/chat" />,
+  //   children: [
+  //     { path: 'login', element: <Login /> },
+  //     { path: '/', element: <Navigate to="/login" /> },
+  //   ],
+  // },
+
+  {
+    path: '/',
+    element: !isLoggedIn ? <Home /> : <Welcome />,
+  },
+  {
+    path: '/chat',
+    element: <Chat />,
+  },
   {
     path: '/login',
     element: !isLoggedIn ? <Login /> : <Navigate to="/" />,

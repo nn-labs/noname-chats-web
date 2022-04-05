@@ -84,8 +84,10 @@ export default function Login() {
         return;
       } else if (response.status === 200) {
         const data = await response.json();
-        console.log(data);
+        localStorage.setItem('_t', data.access_token);
+        localStorage.setItem('_r', data.refresh_token);
         setLoading(false);
+        window.location.href = '/';
         return;
       } else {
         setLoading(false);
