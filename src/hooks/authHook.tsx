@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 export default function useAuth() {
-  const [auth, setAuth] = useState(false);
+  // const [auth, setAuth] = useState(null);
+  const { setUser } = useContext(AuthContext);
 
   useEffect(() => {
     if (!localStorage.getItem('_t')) {
@@ -20,19 +22,20 @@ export default function useAuth() {
             body: JSON.stringify({ token: localStorage.getItem('_t') }),
           });
           if (resp.status === 200) {
-            setAuth(true);
+            const data = await resp.json();
+            setUser(data);
             return;
           } else {
-            setAuth(false);
+            setUser(null);
             return;
           }
         } catch (_) {
-          setAuth(false);
+          setUser(null);
           return;
         }
       })();
     }
   }, []);
 
-  return { auth };
+  // return { auth };
 }

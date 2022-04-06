@@ -8,7 +8,7 @@ import Chat from './components/Chat/Chat';
 import Home from './components/Home/Home';
 import Welcome from './components/Home/Welcome';
 
-const routes = (isLoggedIn: boolean) => [
+const routes = (isLoggedIn: any | null) => [
   // {
   //   path: '/chat',
   //   element: isLoggedIn ? <Chat /> : <Navigate to="/login" />,

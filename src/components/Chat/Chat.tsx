@@ -1,12 +1,99 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import useAuth from '../../hooks/authHook';
+import { AuthContext } from '../../contexts/AuthContext';
 
+let token: string | null;
+let conn: WebSocket;
+
+const API_URL = process.env.REACT_APP_API_URL;
+const WS_URL = process.env.REACT_APP_WS_URL;
 export default function Chat() {
+  const { user } = useContext(AuthContext);
   const [messagesArray, setMessagesArray] = useState<Array<JSX.Element>>([]);
   // const [fromMessages, setFromMessages] = useState<Array<JSX.Element>>([]);
 
   const [message, setMessage] = useState('');
 
   const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    token = localStorage.getItem('_t');
+    conn = new WebSocket(`${WS_URL}/chat?token=${token}`);
+  }, []);
+
+  useEffect(() => {
+    conn.onmessage = function (event) {
+      console.log(event.data);
+      const data = JSON.parse(event.data);
+      console.log(user);
+      if (
+        data['action'] == 'publish-room' &&
+        data['from'] !== user['user_id'] &&
+        data['error'] == null
+      ) {
+        const msg = (
+          <div className="chat-message" key={Math.random().toString()}>
+            <div className="flex items-end justify-end">
+              <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end">
+                <div>
+                  <span className="px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-white ">
+                    {data['message']}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+        setMessagesArray([...messagesArray, msg]);
+      }
+    };
+  });
+
+  useEffect(() => {
+    (async () => {
+      const resp = await fetch(`${API_URL}/get-room`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await resp.json();
+      const roomDbMsg = [];
+      for (const dataKey in data) {
+        if (data[dataKey].to) {
+          const msg = (
+            <div className="chat-message" key={Math.random().toString()}>
+              <div className="flex items-end">
+                <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+                  <div>
+                    <span className="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
+                      {/*Can be verified on any platform using docker*/}
+                      {data[dataKey].message}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+          roomDbMsg.push(msg);
+        } else {
+          const msg = (
+            <div className="chat-message" key={Math.random().toString()}>
+              <div className="flex items-end justify-end">
+                <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end">
+                  <div>
+                    <span className="px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-white ">
+                      {data[dataKey].message}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+          roomDbMsg.push(msg);
+        }
+      }
+
+      setMessagesArray([...messagesArray, ...roomDbMsg]);
+    })();
+  }, []);
 
   const scrollToBottom = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -36,27 +123,36 @@ export default function Chat() {
       </div>
     );
 
+    conn.send(JSON.stringify({ action: 'publish-room', message, token }));
     setMessagesArray([...messagesArray, msg]);
     setMessage('');
   };
 
-  const onClickFakeMessage = () => {
-    const msg = (
-      <div className="chat-message" key={Math.random().toString()}>
-        <div className="flex items-end justify-end">
-          <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end">
-            <div>
-              <span className="px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-white ">
-                Your error message says permission denied, npm global installs
-                must be given root privileges.
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-    setMessagesArray([...messagesArray, msg]);
-  };
+  // const onClickFakeMessage = () => {
+  //   const msg = (
+  //     <div className="chat-message" key={Math.random().toString()}>
+  //       <div className="flex items-end justify-end">
+  //         <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end">
+  //           <div>
+  //             <span className="px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-white ">
+  //               Lorem Ipsum is simply dummy text of the printing and typesetting
+  //               industry. Lorem Ipsum has been the industry&apos;s standard
+  //               dummy text ever since the 1500s, when an unknown printer took a
+  //               galley of type and scrambled it to make a type specimen book. It
+  //               has survived not only five centuries, but also the leap into
+  //               electronic typesetting, remaining essentially unchanged. It was
+  //               popularised in the 1960s with the release of Letraset sheets
+  //               containing Lorem Ipsum passages, and more recently with desktop
+  //               publishing software like Aldus PageMaker including versions of
+  //               Lorem Ipsum.
+  //             </span>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  //   setMessagesArray([...messagesArray, msg]);
+  // };
 
   const handleKeypress = (e: any) => {
     if (e.charCode === 13 && message.length >= 1) {
@@ -75,6 +171,9 @@ export default function Chat() {
         </div>
       );
 
+      conn.send(
+        JSON.stringify({ action: 'publish-room', message, token, to: true }),
+      );
       setMessagesArray([...messagesArray, msg]);
       setMessage('');
     }
@@ -127,7 +226,7 @@ export default function Chat() {
               </svg>
             </button>
 
-            <button onClick={onClickFakeMessage}>Fake from message</button>
+            {/*<button onClick={onClickFakeMessage}>Fake from message</button>*/}
           </div>
         </div>
       </div>
