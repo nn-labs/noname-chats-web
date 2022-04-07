@@ -3,7 +3,7 @@ import React, { useState, createContext, useMemo } from 'react';
 const PageContext: any = createContext(null);
 
 function PageContextComp(props: { children: any }) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const value = useMemo(
     () => ({

@@ -76,8 +76,6 @@ export default function Registration() {
       });
 
       if (response.status === 201) {
-        // const data = await response.json();
-        // console.log(data);
         setLoading(false);
         window.location.href = '/';
         return;

@@ -8,7 +8,7 @@ import Chat from './components/Chat/Chat';
 import Home from './components/Home/Home';
 import Welcome from './components/Home/Welcome';
 
-const routes = (isLoggedIn: any | null) => [
+const routes = (user: any | null) => [
   // {
   //   path: '/chat',
   //   element: isLoggedIn ? <Chat /> : <Navigate to="/login" />,
@@ -25,19 +25,25 @@ const routes = (isLoggedIn: any | null) => [
 
   {
     path: '/',
-    element: !isLoggedIn ? <Home /> : <Welcome />,
+    element: !user ? <Home /> : <Welcome />,
   },
   {
     path: '/chat',
-    element: <Chat />,
+    // element: <Chat />,
+    element:
+      user && user.role === 'support' && !user['is_room'] ? (
+        <Welcome />
+      ) : (
+        <Chat />
+      ),
   },
   {
     path: '/login',
-    element: !isLoggedIn ? <Login /> : <Navigate to="/" />,
+    element: !user ? <Login /> : <Navigate to="/" />,
   },
   {
     path: '/registration',
-    element: !isLoggedIn ? <Registration /> : <Navigate to="/" />,
+    element: !user ? <Registration /> : <Navigate to="/" />,
   },
   {
     path: '*',

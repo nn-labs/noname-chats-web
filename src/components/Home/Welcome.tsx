@@ -1,9 +1,13 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
+import ErrorAlert from '../Alerts/ErrorAlert';
 
 export default function Welcome() {
   const { user } = useContext(AuthContext);
+
+  const [errorAlert, setErrorAlert] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     if (user['is_room']) {
@@ -15,24 +19,31 @@ export default function Welcome() {
     // conn.send(JSON.stringify({action: "join-room", token}))
     (async () => {
       try {
+        setErrorAlert(false);
+
         const resp = await fetch('http://localhost:5000/api/v1/free-user', {
           headers: { Authorization: `Bearer ${localStorage.getItem('_t')}` },
         });
 
         if (resp.status === 200) {
           const data = await resp.json();
-          console.log(data);
           window.location.href = '/chat';
           // conn.send(JSON.stringify({ action: 'join-room', token: localStorage.getItem('_t') }));
+        } else {
+          setErrorMessage('No free users or something went wrong!');
+          setErrorAlert(true);
         }
       } catch (e) {
-        console.log(e);
+        setErrorMessage('Server is not available!');
+        setErrorAlert(true);
       }
     })();
   };
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen">
+      {errorAlert ? <ErrorAlert message={errorMessage} /> : false}
+
       <h1 className="text-5xl font-bold text-neutral-300">Support Chat</h1>
 
       <div>
