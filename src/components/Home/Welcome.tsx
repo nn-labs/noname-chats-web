@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import ErrorAlert from '../Alerts/ErrorAlert';
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 export default function Welcome() {
   const { user } = useContext(AuthContext);
 
@@ -21,12 +23,12 @@ export default function Welcome() {
       try {
         setErrorAlert(false);
 
-        const resp = await fetch('http://localhost:5000/api/v1/free-user', {
+        const resp = await fetch(`${API_URL}/free-user`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('_t')}` },
         });
 
         if (resp.status === 200) {
-          const data = await resp.json();
+          // const data = await resp.json();
           window.location.href = '/chat';
           // conn.send(JSON.stringify({ action: 'join-room', token: localStorage.getItem('_t') }));
         } else {
