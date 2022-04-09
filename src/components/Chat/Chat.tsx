@@ -67,7 +67,7 @@ export default function Chat() {
       try {
         setErrorAlert(false);
 
-        const resp = await fetch(`${API_URL}/get-room`, {
+        const resp = await fetch(`${API_URL}/get-room-messages`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
