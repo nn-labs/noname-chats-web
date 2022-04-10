@@ -20,6 +20,8 @@ export default function useAuth() {
             userData = await check();
             setUser(userData);
             return;
+          } else {
+            setUser(userData);
           }
         } catch (_) {
           setUser(null);

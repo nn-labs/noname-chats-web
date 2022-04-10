@@ -5,7 +5,6 @@ import routes from './routes';
 import { AuthContext } from './contexts/AuthContext';
 
 function App() {
-  // const { user } = useAuth();
   useAuth();
   const { user } = useContext(AuthContext);
   const routing = useRoutes(routes(user));
