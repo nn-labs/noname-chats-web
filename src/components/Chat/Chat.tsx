@@ -44,13 +44,15 @@ export default function Chat() {
         data['from'] !== user['user_id'] &&
         data['error'] == null
       ) {
+        const decMsg = decrypt(data['message']);
+
         const msg = (
           <div className="chat-message" key={Math.random().toString()}>
             <div className="flex items-end justify-end">
               <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end">
                 <div>
                   <span className="px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-white ">
-                    {data['message']}
+                    {decMsg.toString()}
                   </span>
                 </div>
               </div>
