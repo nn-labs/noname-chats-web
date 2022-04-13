@@ -16,7 +16,9 @@ export default function Chat() {
   const [messagesArray, setMessagesArray] = useState<Array<JSX.Element>>([]);
 
   const [errorAlert, setErrorAlert] = useState(false);
+  const [socketErrorAlert, setSocketErrorAlert] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [socketErrorMessage, setSocketErrorMessage] = useState('');
 
   const [loading, setLoading] = useState(false);
 
@@ -30,13 +32,13 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
-    setErrorAlert(false);
     conn.onmessage = function (event) {
       const data = JSON.parse(event.data);
 
       if (data['error']) {
-        setErrorMessage(data['error']);
-        setErrorAlert(true);
+        setSocketErrorAlert(false);
+        setSocketErrorMessage(data['error']);
+        setSocketErrorAlert(true);
       }
 
       if (
@@ -72,7 +74,6 @@ export default function Chat() {
     const timer1 = setTimeout(async () => {
       try {
         setErrorAlert(false);
-
         setLoading(true);
         const resp = await fetch(`${API_URL}/get-room-messages`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -230,11 +231,14 @@ export default function Chat() {
     //   <h1 className="text-5xl font-bold text-neutral-300">Chat</h1>
     // </div>
     <>
+      <div className="flex justify-center items-center">
+        {errorAlert ? <ErrorAlert message={errorMessage} /> : false}
+        {socketErrorAlert ? <ErrorAlert message={socketErrorMessage} /> : false}
+      </div>
+
       <Loader loading={loading} />
 
       <div className="flex-1 p:2 sm:p-6 justify-between flex flex-col h-screen">
-        {errorAlert ? <ErrorAlert message={errorMessage} /> : false}
-
         <div
           id="messages"
           className="flex flex-col space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-auto"
