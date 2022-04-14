@@ -5,7 +5,6 @@ import { encrypt } from '../../crypto/encode';
 import { decrypt } from '../../crypto/decrypt';
 import Loader from '../Loader/Loader';
 
-let token: string | null;
 let conn: WebSocket;
 
 const API_URL = process.env.REACT_APP_API_URL;
@@ -20,15 +19,14 @@ export default function Chat() {
   const [errorMessage, setErrorMessage] = useState('');
   const [socketErrorMessage, setSocketErrorMessage] = useState('');
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [message, setMessage] = useState('');
 
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    token = localStorage.getItem('_t');
-    conn = new WebSocket(`${WS_URL}/chat?token=${token}`);
+    conn = new WebSocket(`${WS_URL}/chat`);
   }, []);
 
   useEffect(() => {
@@ -39,6 +37,10 @@ export default function Chat() {
         setSocketErrorAlert(false);
         setSocketErrorMessage(data['error']);
         setSocketErrorAlert(true);
+      }
+
+      if (data['action'] == 'connected') {
+        setLoading(false);
       }
 
       if (
@@ -70,73 +72,73 @@ export default function Chat() {
     };
   });
 
-  useEffect(() => {
-    const timer1 = setTimeout(async () => {
-      try {
-        setErrorAlert(false);
-        setLoading(true);
-        const resp = await fetch(`${API_URL}/get-room-messages`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (resp.status === 200) {
-          const data = await resp.json();
-          const roomDbMsg = [];
-          for (const dataKey in data) {
-            if (data[dataKey].to) {
-              const decMsg = decrypt(data[dataKey].message);
-              const msg = (
-                <div className="chat-message" key={Math.random().toString()}>
-                  <div className="flex items-end">
-                    <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
-                      <div>
-                        <span className="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
-                          {/*Can be verified on any platform using docker*/}
-                          {decMsg.toString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-              roomDbMsg.push(msg);
-            } else {
-              const decMsg = decrypt(data[dataKey].message);
-              const msg = (
-                <div className="chat-message" key={Math.random().toString()}>
-                  <div className="flex items-end justify-end">
-                    <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end">
-                      <div>
-                        <span className="px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-white ">
-                          {decMsg.toString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-              roomDbMsg.push(msg);
-            }
-          }
-
-          setLoading(false);
-          setMessagesArray([...messagesArray, ...roomDbMsg]);
-        } else {
-          setErrorMessage('Something went wrong');
-          setErrorAlert(true);
-        }
-      } catch (e) {
-        setErrorMessage('Server is not available!');
-        setErrorAlert(true);
-      } finally {
-        setLoading(false);
-      }
-    }, 500);
-
-    return () => {
-      clearTimeout(timer1);
-    };
-  }, []);
+  // useEffect(() => {
+  //   const timer = setTimeout(async () => {
+  //     try {
+  //       setErrorAlert(false);
+  //       setLoading(true);
+  //       const resp = await fetch(`${API_URL}/get-room-messages`, {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       });
+  //
+  //       if (resp.status === 200) {
+  //         const data = await resp.json();
+  //         const roomDbMsg = [];
+  //         for (const dataKey in data) {
+  //           if (data[dataKey].to) {
+  //             const decMsg = decrypt(data[dataKey].message);
+  //             const msg = (
+  //               <div className="chat-message" key={Math.random().toString()}>
+  //                 <div className="flex items-end">
+  //                   <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+  //                     <div>
+  //                       <span className="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
+  //                         {/*Can be verified on any platform using docker*/}
+  //                         {decMsg.toString()}
+  //                       </span>
+  //                     </div>
+  //                   </div>
+  //                 </div>
+  //               </div>
+  //             );
+  //             roomDbMsg.push(msg);
+  //           } else {
+  //             const decMsg = decrypt(data[dataKey].message);
+  //             const msg = (
+  //               <div className="chat-message" key={Math.random().toString()}>
+  //                 <div className="flex items-end justify-end">
+  //                   <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end">
+  //                     <div>
+  //                       <span className="px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-white ">
+  //                         {decMsg.toString()}
+  //                       </span>
+  //                     </div>
+  //                   </div>
+  //                 </div>
+  //               </div>
+  //             );
+  //             roomDbMsg.push(msg);
+  //           }
+  //         }
+  //
+  //         setLoading(false);
+  //         setMessagesArray([...messagesArray, ...roomDbMsg]);
+  //       } else {
+  //         setErrorMessage('Something went wrong');
+  //         setErrorAlert(true);
+  //       }
+  //     } catch (e) {
+  //       setErrorMessage('Server is not available!');
+  //       setErrorAlert(true);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }, 500);
+  //
+  //   return () => {
+  //     clearTimeout(timer);
+  //   };
+  // }, []);
 
   const scrollToBottom = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -174,7 +176,6 @@ export default function Chat() {
           JSON.stringify({
             action: 'publish-room',
             message: encodeMessage,
-            token,
           }),
         );
         setMessagesArray([...messagesArray, msg]);
@@ -210,7 +211,6 @@ export default function Chat() {
           JSON.stringify({
             action: 'publish-room',
             message: encodeMessage,
-            token,
           }),
         );
         setMessagesArray([...messagesArray, msg]);
@@ -223,7 +223,7 @@ export default function Chat() {
   };
 
   const onClickDisconnect = () => {
-    conn.send(JSON.stringify({ action: 'disconnect', token }));
+    conn.send(JSON.stringify({ action: 'disconnect' }));
   };
 
   return (
