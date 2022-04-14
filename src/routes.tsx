@@ -1,11 +1,7 @@
 import React from 'react';
 
-import { Navigate } from 'react-router-dom';
-import Login from './components/Auth/Login';
-import Registration from './components/Auth/Registration';
 import Error from './components/Error/Error';
 import Chat from './components/Chat/Chat';
-import Home from './components/Home/Home';
 import Welcome from './components/Home/Welcome';
 
 const routes = () => [

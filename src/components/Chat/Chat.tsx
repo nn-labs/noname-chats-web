@@ -7,7 +7,7 @@ import Loader from '../Loader/Loader';
 
 let conn: WebSocket;
 
-const API_URL = process.env.REACT_APP_API_URL;
+// const API_URL = process.env.REACT_APP_API_URL;
 const WS_URL = process.env.REACT_APP_WS_URL;
 
 export default function Chat() {
