@@ -7,7 +7,7 @@ import Loader from '../Loader/Loader';
 import fp from '@fingerprintjs/fingerprintjs';
 
 let conn: WebSocket;
-let fingerprint: string;
+let fingerprint: string | null;
 
 // const API_URL = process.env.REACT_APP_API_URL;
 const WS_URL = process.env.REACT_APP_WS_URL;
@@ -28,13 +28,8 @@ export default function Chat() {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    (async () => {
-      const fpLoad = await fp.load();
-      const fpResult = await fpLoad.get();
-      fingerprint = fpResult.visitorId;
-      console.log(fpResult.visitorId);
-      conn = new WebSocket(`${WS_URL}/chat?fingerprint=${fingerprint}`);
-    })();
+    fingerprint = localStorage.getItem('fingerprint');
+    conn = new WebSocket(`${WS_URL}/chat?fingerprint=${fingerprint}`);
   }, []);
 
   useEffect(() => {
