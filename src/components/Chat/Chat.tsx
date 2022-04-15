@@ -4,8 +4,10 @@ import ErrorAlert from '../Alerts/ErrorAlert';
 import { encrypt } from '../../crypto/encode';
 import { decrypt } from '../../crypto/decrypt';
 import Loader from '../Loader/Loader';
+import fp from '@fingerprintjs/fingerprintjs';
 
 let conn: WebSocket;
+let fingerprint: string;
 
 // const API_URL = process.env.REACT_APP_API_URL;
 const WS_URL = process.env.REACT_APP_WS_URL;
@@ -26,7 +28,13 @@ export default function Chat() {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    conn = new WebSocket(`${WS_URL}/chat`);
+    (async () => {
+      const fpLoad = await fp.load();
+      const fpResult = await fpLoad.get();
+      fingerprint = fpResult.visitorId;
+      console.log(fpResult.visitorId);
+      conn = new WebSocket(`${WS_URL}/chat?fingerprint=${fingerprint}`);
+    })();
   }, []);
 
   useEffect(() => {
@@ -176,6 +184,7 @@ export default function Chat() {
           JSON.stringify({
             action: 'publish-room',
             message: encodeMessage,
+            fingerprint: fingerprint,
           }),
         );
         setMessagesArray([...messagesArray, msg]);
@@ -211,6 +220,7 @@ export default function Chat() {
           JSON.stringify({
             action: 'publish-room',
             message: encodeMessage,
+            fingerprint: fingerprint,
           }),
         );
         setMessagesArray([...messagesArray, msg]);
@@ -223,7 +233,9 @@ export default function Chat() {
   };
 
   const onClickDisconnect = () => {
-    conn.send(JSON.stringify({ action: 'disconnect' }));
+    conn.send(
+      JSON.stringify({ action: 'disconnect', fingerprint: fingerprint }),
+    );
   };
 
   return (

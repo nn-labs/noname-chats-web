@@ -1,23 +1,16 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
-import fp from '@fingerprintjs/fingerprintjs';
+// import fp from '@fingerprintjs/fingerprintjs';
 
 export default function Welcome() {
-  useEffect(() => {
-    (() => {
-      const fpPromise = fp.load();
-
-      // Get the visitor identifier when you need it.
-      fpPromise
-        .then((fp) => fp.get())
-        .then((result) => {
-          // This is the visitor identifier:
-          const visitorId = result.visitorId;
-          console.log(visitorId);
-        });
-    })();
-  });
+  // useEffect(() => {
+  //   (async () => {
+  //     const fpLoad = await fp.load();
+  //     const fpResult = await fpLoad.get()
+  //     console.log(fpResult.visitorId)
+  //   })();
+  // });
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen">
