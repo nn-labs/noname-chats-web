@@ -1,17 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-// import fp from '@fingerprintjs/fingerprintjs';
-
 export default function Welcome() {
-  // useEffect(() => {
-  //   (async () => {
-  //     const fpLoad = await fp.load();
-  //     const fpResult = await fpLoad.get()
-  //     console.log(fpResult.visitorId)
-  //   })();
-  // });
-
   return (
     <div className="flex flex-col justify-center items-center min-h-screen">
       <h1 className="text-5xl font-bold text-neutral-300">Welcome</h1>

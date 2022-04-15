@@ -1,19 +1,15 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { AuthContext } from '../../contexts/AuthContext';
+import React, { useEffect, useRef, useState } from 'react';
 import ErrorAlert from '../Alerts/ErrorAlert';
 import { encrypt } from '../../crypto/encode';
 import { decrypt } from '../../crypto/decrypt';
 import Loader from '../Loader/Loader';
-import fp from '@fingerprintjs/fingerprintjs';
 
 let conn: WebSocket;
 let fingerprint: string | null;
 
-// const API_URL = process.env.REACT_APP_API_URL;
 const WS_URL = process.env.REACT_APP_WS_URL;
 
 export default function Chat() {
-  const { user } = useContext(AuthContext);
   const [messagesArray, setMessagesArray] = useState<Array<JSX.Element>>([]);
 
   const [errorAlert, setErrorAlert] = useState(false);
@@ -48,7 +44,7 @@ export default function Chat() {
 
       if (
         data['action'] == 'publish-room' &&
-        data['from'] !== user['user_id'] &&
+        data['from'] !== fingerprint &&
         data['error'] == null
       ) {
         const decMsg = decrypt(data['message']);
@@ -75,74 +71,6 @@ export default function Chat() {
     };
   });
 
-  // useEffect(() => {
-  //   const timer = setTimeout(async () => {
-  //     try {
-  //       setErrorAlert(false);
-  //       setLoading(true);
-  //       const resp = await fetch(`${API_URL}/get-room-messages`, {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       });
-  //
-  //       if (resp.status === 200) {
-  //         const data = await resp.json();
-  //         const roomDbMsg = [];
-  //         for (const dataKey in data) {
-  //           if (data[dataKey].to) {
-  //             const decMsg = decrypt(data[dataKey].message);
-  //             const msg = (
-  //               <div className="chat-message" key={Math.random().toString()}>
-  //                 <div className="flex items-end">
-  //                   <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
-  //                     <div>
-  //                       <span className="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
-  //                         {/*Can be verified on any platform using docker*/}
-  //                         {decMsg.toString()}
-  //                       </span>
-  //                     </div>
-  //                   </div>
-  //                 </div>
-  //               </div>
-  //             );
-  //             roomDbMsg.push(msg);
-  //           } else {
-  //             const decMsg = decrypt(data[dataKey].message);
-  //             const msg = (
-  //               <div className="chat-message" key={Math.random().toString()}>
-  //                 <div className="flex items-end justify-end">
-  //                   <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end">
-  //                     <div>
-  //                       <span className="px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-white ">
-  //                         {decMsg.toString()}
-  //                       </span>
-  //                     </div>
-  //                   </div>
-  //                 </div>
-  //               </div>
-  //             );
-  //             roomDbMsg.push(msg);
-  //           }
-  //         }
-  //
-  //         setLoading(false);
-  //         setMessagesArray([...messagesArray, ...roomDbMsg]);
-  //       } else {
-  //         setErrorMessage('Something went wrong');
-  //         setErrorAlert(true);
-  //       }
-  //     } catch (e) {
-  //       setErrorMessage('Server is not available!');
-  //       setErrorAlert(true);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }, 500);
-  //
-  //   return () => {
-  //     clearTimeout(timer);
-  //   };
-  // }, []);
-
   const scrollToBottom = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -165,7 +93,6 @@ export default function Chat() {
               <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
                 <div>
                   <span className="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
-                    {/*Can be verified on any platform using docker*/}
                     {message}
                   </span>
                 </div>
@@ -201,7 +128,6 @@ export default function Chat() {
               <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
                 <div>
                   <span className="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
-                    {/*Can be verified on any platform using docker*/}
                     {message}
                   </span>
                 </div>
@@ -234,9 +160,6 @@ export default function Chat() {
   };
 
   return (
-    // <div className="flex flex-col justify-center items-center min-h-screen">
-    //   <h1 className="text-5xl font-bold text-neutral-300">Chat</h1>
-    // </div>
     <>
       <div className="flex justify-center items-center">
         {errorAlert ? <ErrorAlert message={errorMessage} /> : false}
@@ -250,11 +173,8 @@ export default function Chat() {
           id="messages"
           className="flex flex-col space-y-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2 scrolling-auto"
         >
-          {/*  /!*To message*!/*/}
           {messagesArray.length != 0 ? <>{messagesArray}</> : <div />}
           <div ref={messagesEndRef} />
-          {/*From message*/}
-          {/*{fromMessages.length != 0 ? <>{fromMessages}</> : <div />}*/}
         </div>
 
         <div className="border-t-2 border-gray-200 px-4 pt-4 mb-2 sm:mb-0">
@@ -278,7 +198,6 @@ export default function Chat() {
             >
               <button type="button" onClick={onClickSend}>
                 <svg
-                  // className="w-6 h-6 text-black origin-center transform rotate-90 m-2"
                   className="w-6 h-6 text-black origin-center transform rotate-90 m-2"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 20 20"
@@ -307,38 +226,6 @@ export default function Chat() {
                 </svg>
               </button>
             </div>
-
-            {/*<div className="absolute right-0 items-center inset-y-0 hidden sm:flex">*/}
-            {/*<button*/}
-            {/*  type="button"*/}
-            {/*  onClick={onClickSend}*/}
-            {/*  // block w-full max-w-xs mx-auto bg-gray-500 hover:bg-gray-600 text-white px-3 py-3 font-semibold pointer-events-none*/}
-            {/*  className={*/}
-            {/*    message.length == 0*/}
-            {/*      ? 'inline-flex items-center justify-center px-4 py-3 transition duration-500 ease-in-out text-white font-semibold pointer-events-none bg-gray-500'*/}
-            {/*      : 'inline-flex items-center justify-center px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none'*/}
-            {/*  }*/}
-            {/*>*/}
-            {/*  <span className="font-bold">Send</span>*/}
-            {/*  <svg*/}
-            {/*    xmlns="http://www.w3.org/2000/svg"*/}
-            {/*    viewBox="0 0 20 20"*/}
-            {/*    fill="currentColor"*/}
-            {/*    className="h-6 w-6 ml-2 transform rotate-90"*/}
-            {/*  >*/}
-            {/*    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />*/}
-            {/*  </svg>*/}
-            {/*</button>*/}
-
-            {/*<button*/}
-            {/*  type="button"*/}
-            {/*  onClick={onClickDisconnect}*/}
-            {/*  // block w-full max-w-xs mx-auto bg-gray-500 hover:bg-gray-600 text-white px-3 py-3 font-semibold pointer-events-none*/}
-            {/*  className="inline-flex items-center justify-center px-4 py-3 transition duration-500 ease-in-out text-white bg-blue-500 hover:bg-blue-400 focus:outline-none"*/}
-            {/*>*/}
-            {/*  <span className="font-bold">Disconnect</span>*/}
-            {/*</button>*/}
-            {/*</div>*/}
           </div>
         </div>
       </div>
