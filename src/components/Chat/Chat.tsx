@@ -52,9 +52,9 @@ export default function Chat() {
         const msg = (
           <div className="chat-message" key={Math.random().toString()}>
             <div className="flex items-end justify-end">
-              <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-1 items-end">
+              <div className="flex flex-col space-y-2 text-xl max-w-xs mx-2 order-1 items-end break-all">
                 <div>
-                  <span className="px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-white ">
+                  <span className="px-4 py-2 rounded-lg inline-block rounded-br-none bg-blue-600 text-white">
                     {decMsg.toString()}
                   </span>
                 </div>
@@ -79,20 +79,27 @@ export default function Chat() {
 
   useEffect(scrollToBottom, [messagesArray]);
 
-  const onChangeMessage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onChangeMessage = (event: any) => {
     setMessage(event.target.value);
   };
 
   const onClickSend = () => {
+    setErrorAlert(false);
+    if (message.length > 8000) {
+      setErrorAlert(true);
+      setErrorMessage('Message too long');
+      return;
+    }
+
     try {
       setErrorAlert(false);
       if (message.length > 0) {
         const msg = (
-          <div className="chat-message" key={Math.random().toString()}>
+          <div key={Math.random().toString()}>
             <div className="flex items-end">
-              <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+              <div className="flex flex-col space-y-2 text-xl max-w-xs mx-2 order-2 items-start break-all">
                 <div>
-                  <span className="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
+                  <span className="block px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
                     {message}
                   </span>
                 </div>
@@ -115,17 +122,26 @@ export default function Chat() {
     } catch (e) {
       setErrorMessage('Failed send message');
       setErrorAlert(true);
+    } finally {
+      setErrorAlert(false);
     }
   };
 
   const handleKeypress = (e: any) => {
+    setErrorAlert(false);
+    if (message.length > 8000) {
+      setErrorAlert(true);
+      setErrorMessage('Message too long');
+      return;
+    }
+
     if (e.charCode === 13 && message.length > 0) {
       try {
         setErrorAlert(false);
         const msg = (
           <div className="chat-message" key={Math.random().toString()}>
             <div className="flex items-end">
-              <div className="flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start">
+              <div className="flex flex-col space-y-2 text-xl max-w-xs mx-2 order-2 items-start break-all">
                 <div>
                   <span className="px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600">
                     {message}
@@ -149,6 +165,8 @@ export default function Chat() {
       } catch (e) {
         setErrorMessage('Failed send message');
         setErrorAlert(true);
+      } finally {
+        setErrorAlert(false);
       }
     }
   };
@@ -187,6 +205,7 @@ export default function Chat() {
               onKeyPress={handleKeypress}
               className="block w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 pl-5 bg-gray-200 rounded-md py-3"
               required
+              autoFocus={!loading}
             />
 
             <div
