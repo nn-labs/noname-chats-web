@@ -84,13 +84,6 @@ export default function Chat() {
   };
 
   const onClickSend = () => {
-    setErrorAlert(false);
-    if (message.length > 8000) {
-      setErrorAlert(true);
-      setErrorMessage('Message too long');
-      return;
-    }
-
     try {
       setErrorAlert(false);
       if (message.length > 0) {
@@ -108,14 +101,29 @@ export default function Chat() {
           </div>
         );
 
-        const encodeMessage = encrypt(message);
-        conn.send(
-          JSON.stringify({
-            action: 'publish-room',
-            message: encodeMessage,
-            fingerprint: fingerprint,
-          }),
-        );
+        if (message.length > 8000) {
+          for (let i = 0; i < message.length; i += 2000) {
+            const chunk = message.slice(i, i + 2000);
+            const encodeMessage = encrypt(chunk);
+            conn.send(
+              JSON.stringify({
+                action: 'publish-room',
+                message: encodeMessage,
+                fingerprint: fingerprint,
+              }),
+            );
+          }
+        } else {
+          const encodeMessage = encrypt(message);
+          conn.send(
+            JSON.stringify({
+              action: 'publish-room',
+              message: encodeMessage,
+              fingerprint: fingerprint,
+            }),
+          );
+        }
+
         setMessagesArray([...messagesArray, msg]);
         setMessage('');
       }
@@ -128,13 +136,6 @@ export default function Chat() {
   };
 
   const handleKeypress = (e: any) => {
-    setErrorAlert(false);
-    if (message.length > 8000) {
-      setErrorAlert(true);
-      setErrorMessage('Message too long');
-      return;
-    }
-
     if (e.charCode === 13 && message.length > 0) {
       try {
         setErrorAlert(false);
@@ -152,14 +153,29 @@ export default function Chat() {
           </div>
         );
 
-        const encodeMessage = encrypt(message);
-        conn.send(
-          JSON.stringify({
-            action: 'publish-room',
-            message: encodeMessage,
-            fingerprint: fingerprint,
-          }),
-        );
+        if (message.length > 8000) {
+          for (let i = 0; i < message.length; i += 2000) {
+            const chunk = message.slice(i, i + 2000);
+            const encodeMessage = encrypt(chunk);
+            conn.send(
+              JSON.stringify({
+                action: 'publish-room',
+                message: encodeMessage,
+                fingerprint: fingerprint,
+              }),
+            );
+          }
+        } else {
+          const encodeMessage = encrypt(message);
+          conn.send(
+            JSON.stringify({
+              action: 'publish-room',
+              message: encodeMessage,
+              fingerprint: fingerprint,
+            }),
+          );
+        }
+
         setMessagesArray([...messagesArray, msg]);
         setMessage('');
       } catch (e) {
