@@ -169,14 +169,29 @@ export default function Chat() {
           </div>
         );
 
-        const encodeMessage = encrypt(message);
-        conn.send(
-          JSON.stringify({
-            action: 'publish-room',
-            message: encodeMessage,
-            token,
-          }),
-        );
+        if (message.length > 8000) {
+          for (let i = 0; i < message.length; i += 2000) {
+            const chunk = message.slice(i, i + 2000);
+            const encodeMessage = encrypt(chunk);
+            conn.send(
+              JSON.stringify({
+                action: 'publish-room',
+                message: encodeMessage,
+                token,
+              }),
+            );
+          }
+        } else {
+          const encodeMessage = encrypt(message);
+          conn.send(
+            JSON.stringify({
+              action: 'publish-room',
+              message: encodeMessage,
+              token,
+            }),
+          );
+        }
+
         setMessagesArray([...messagesArray, msg]);
         setMessage('');
       }
@@ -205,14 +220,29 @@ export default function Chat() {
           </div>
         );
 
-        const encodeMessage = encrypt(message);
-        conn.send(
-          JSON.stringify({
-            action: 'publish-room',
-            message: encodeMessage,
-            token,
-          }),
-        );
+        if (message.length > 8000) {
+          for (let i = 0; i < message.length; i += 2000) {
+            const chunk = message.slice(i, i + 2000);
+            const encodeMessage = encrypt(chunk);
+            conn.send(
+              JSON.stringify({
+                action: 'publish-room',
+                message: encodeMessage,
+                token,
+              }),
+            );
+          }
+        } else {
+          const encodeMessage = encrypt(message);
+          conn.send(
+            JSON.stringify({
+              action: 'publish-room',
+              message: encodeMessage,
+              token,
+            }),
+          );
+        }
+
         setMessagesArray([...messagesArray, msg]);
         setMessage('');
       } catch (e) {
